@@ -1,0 +1,3 @@
+string led_1_status
+string led_2_status
+string led_3_status
