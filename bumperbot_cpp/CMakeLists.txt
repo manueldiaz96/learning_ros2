@@ -19,6 +19,8 @@ ament_target_dependencies(simple_publisher rclcpp std_msgs)
 add_executable(simple_subscriber src/simple_subscriber_cpp.cpp)
 ament_target_dependencies(simple_subscriber rclcpp std_msgs)
 
+add_executable(simple_parameter src/simple_parameter.cpp)
+ament_target_dependencies(simple_parameter rclcpp rcl_interfaces)
 
 # Where to install them
 
@@ -26,6 +28,7 @@ install(TARGETS
   ## Which executables are put into the insall folder
   simple_publisher
   simple_subscriber
+  simple_parameter
   DESTINATION lib/${PROJECT_NAME} ## Variable for the local project name
 )
 
