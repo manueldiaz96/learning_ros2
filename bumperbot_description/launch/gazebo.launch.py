@@ -15,11 +15,11 @@ def generate_launch_description():
 
     launch_description = LaunchDescription()
 
-    #bumperbot_description_dir = get_package_share_directory("bumperbot_description")
+    bumperbot_description_dir = get_package_share_directory("bumperbot_description")
 
     model_arg = DeclareLaunchArgument(
         name = "model",
-        default_value= os.path.join(get_package_share_directory("bumperbot_description"), "urdf", "bumperbot.urdf.xacro"),
+        default_value= os.path.join(bumperbot_description_dir, "urdf", "bumperbot.urdf.xacro"),
         description="Absolute path to robot URDF file"
     )
 
@@ -33,9 +33,9 @@ def generate_launch_description():
     )
 
     gazebo_resource_path = SetEnvironmentVariable(
-        name="GZ_SIM_RESOUCE_PATH",
+        name="GZ_SIM_RESOURCE_PATH",
         value=[
-            str(Path(get_package_share_directory("bumperbot_description")).parent.resolve())
+            str(Path(bumperbot_description_dir).parent.resolve())
         ]
     )
 
