@@ -2,11 +2,21 @@
 
 <robot name="bumperbot" xmlns:xacro="http://ros.org/wiki/xacro">
 
+  <argument name="is_ignition" default="true" />
+
   <!-- Include Gazebo Parameters -->
   <xacro:include filename="$(find bumperbot_description)/urdf/bumperbot_gazebo.xacro" />
 
+  <!-- Include ROS2 contol Parameters -->
+  <xacro:include filename="$(find bumperbot_description)/urdf/bumperbot_ros2_control.xacro" />
+
+
+  <!-- base_footprint -->
+
   <link name="base_footprint"/>
   
+  <!-- base_link -->
+
   <link name="base_link">
     <inertial>
       <origin xyz="0 0 0.04" rpy="0.0 0.25 0.3" />
@@ -34,6 +44,8 @@
     <child link="base_link" />  
     <origin xyz="0 0 0.033" rpy="0 0 0"/>
   </joint>
+
+  <!-- wheel_right_link -->
 
   <link name="wheel_right_link">
     <inertial>
@@ -64,6 +76,8 @@
     <axis xyz="0 1 0" />
   </joint>
   
+  <!-- wheel_left_link -->
+
   <link
     name="wheel_left_link">
     <inertial>
@@ -94,6 +108,8 @@
     <axis xyz="0 1 0" />
   </joint>
 
+  <!-- caster_front_link -->
+
   <link name="caster_front_link">
     <inertial>
       <origin xyz="3.89968128948481E-07 2.40073004698083E-07 0.00219173397061506" rpy="0 0 0" />
@@ -123,6 +139,8 @@
     <axis xyz="0 0 0" />
   </joint>
   
+  <!-- caster_rear_link -->
+
   <link name="caster_rear_link">
     <inertial>
       <origin xyz="3.8996812895542E-07 2.40073004698083E-07 0.00219173397061509" rpy="0 0 0" />
