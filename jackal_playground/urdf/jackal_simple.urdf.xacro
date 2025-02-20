@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+
+<robot name="jackal" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <link name="base_link"/>
+
+    <!-- Chassis -->
+
+    <link name="chassis_link">
+        <visual>
+            <origin xyz="0 0 -0.0655" rpy="1.57 0 1.57"/>
+            <geometry>
+                <mesh filename="package://jackal_playground/meshes/jackal-base.stl"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="base_joint" type="fixed">
+      <parent link="base_link" />
+      <child link="chassis_link" />
+      <axis xyz="0 0 0" />
+      <origin rpy="0 0 0" xyz="0 0 0" />
+    </joint>
+
+    <!-- Front right wheel -->
+
+    <link name="wheel_front_right_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="1.57 0 0"/>
+            <geometry>
+                <mesh filename="package://jackal_playground/meshes/jackal-wheel.stl"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="wheel_front_right_joint" type="continuous">
+      <parent link="chassis_link" />
+      <child link="wheel_front_right_link" />
+      <origin rpy="0 0 0" xyz="0.131 -0.187795 0.0345" />
+      <axis xyz="0 1 0" />
+    </joint>
+
+    <!-- Front left wheel -->
+
+    <link name="wheel_front_left_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="1.57 0 0"/>
+            <geometry>
+                <mesh filename="package://jackal_playground/meshes/jackal-wheel.stl"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="wheel_front_left_joint" type="continuous">
+      <parent link="chassis_link" />
+      <child link="wheel_front_left_link" />
+      <origin rpy="0 0 0" xyz="0.131 0.187795 0.0345" />
+      <axis xyz="0 1 0" />
+    </joint>
+
+    <!-- Back right wheel -->
+
+    <link name="wheel_back_right_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="1.57 0 0"/>
+            <geometry>
+                <mesh filename="package://jackal_playground/meshes/jackal-wheel.stl"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="wheel_back_right_joint" type="continuous">
+      <parent link="chassis_link" />
+      <child link="wheel_back_right_link" />
+      <origin rpy="0 0 0" xyz="-0.131 -0.187795 0.0345" />
+      <axis xyz="0 1 0" />
+    </joint>
+
+    <!-- Back left wheel -->
+
+    <link name="wheel_back_left_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="1.57 0 0"/>
+            <geometry>
+                <mesh filename="package://jackal_playground/meshes/jackal-wheel.stl"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="wheel_back_left_joint" type="continuous">
+      <parent link="chassis_link" />
+      <child link="wheel_back_left_link" />
+      <origin rpy="0 0 0" xyz="-0.131 0.187795 0.0345" />
+      <axis xyz="0 1 0" />
+    </joint>
+
+</robot>

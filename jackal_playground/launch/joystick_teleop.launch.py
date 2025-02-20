@@ -17,7 +17,7 @@ def generate_launch_description():
     joy_teleop = Node(
         package="joy_teleop",
         executable="joy_teleop",
-        parameters=[os.path.join(get_package_share_directory("bumperbot_controller"), "config", "joy_teleop.yaml"),
+        parameters=[os.path.join(get_package_share_directory("jackal_playground"), "config", "joy_teleop.yaml"),
                     {"use_sim_time": LaunchConfiguration("use_sim_time")}],
     )
 
@@ -25,14 +25,22 @@ def generate_launch_description():
         package="joy",
         executable="joy_node",
         name="joystick",
-        parameters=[os.path.join(get_package_share_directory("bumperbot_controller"), "config", "joy_config.yaml"),
+        parameters=[os.path.join(get_package_share_directory("jackal_playground"), "config", "joy_config.yaml"),
                     {"use_sim_time": LaunchConfiguration("use_sim_time")}]
+    )
+
+    cmd_vel_stamper = Node(
+        package="aux_utils",
+        executable="twist_stamped_publisher",
+        parameters=[{"in_topic_name": "jackal_controller/cmd_vel_unstamped",
+                     "out_topic_name": "jackal_controller/cmd_vel"}]
     )
 
     return LaunchDescription(
         [
             use_sim_time_arg,
             joy_teleop,
-            joy_node
+            joy_node,
+            cmd_vel_stamper
         ]
     )
