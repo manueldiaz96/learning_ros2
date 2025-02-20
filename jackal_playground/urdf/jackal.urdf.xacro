@@ -21,12 +21,12 @@
             <geometry>
                 <mesh filename="package://jackal_playground/meshes/jackal-base.stl"/>
             </geometry>
-            <material name="light_gray" />
+            <material name="yellow" />
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0 0 0.092" rpy="0 0 0"/>
             <geometry>
-                <mesh filename="package://jackal_playground/meshes/jackal-base.stl"/>
+                <box size="0.420 0.310 0.184"/>
             </geometry>
             
         </collision>
