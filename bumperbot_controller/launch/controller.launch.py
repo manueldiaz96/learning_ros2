@@ -65,15 +65,15 @@ def generate_launch_description():
                            "/controller_manager"
                 ]
             ),
-            Node(
-                package="bumperbot_controller",
-                executable="simple_controller.py",
-                parameters=[
-                    {"wheel_radius": wheel_radius,
-                    "wheel_separation": wheel_separation,
-                    "use_sim_time": use_sim_time}],
-                condition=IfCondition(use_python),
-            ),
+            # Node(
+            #     package="bumperbot_controller",
+            #     executable="simple_controller.py",
+            #     parameters=[
+            #         {"wheel_radius": wheel_radius,
+            #         "wheel_separation": wheel_separation,
+            #         "use_sim_time": use_sim_time}],
+            #     condition=IfCondition(use_python),
+            # ),
             Node(
                 package="bumperbot_controller",
                 executable="simple_controller",

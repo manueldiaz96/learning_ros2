@@ -23,18 +23,19 @@ SimpleTfKinematics::SimpleTfKinematics(const std::string &name) :
     static_transform_stamped_.transform.translation.z = 0.03;
 
     // With this quaternion we say that the two TFs have the same orientation
-
     static_transform_stamped_.transform.rotation.x = 0.0 ;
     static_transform_stamped_.transform.rotation.y = 0.0 ;
     static_transform_stamped_.transform.rotation.z = 0.0 ;
     static_transform_stamped_.transform.rotation.w = 1.0 ;
 
     static_tf_broadcaster_->sendTransform(static_transform_stamped_);
+
+    // We can also use Euler angles to initialize the Quaternions
+    last_orientation_.setRPY(0.0, 0.0, 0.0);
+    orientation_increment_.setRPY(0.0, 0.0, 0.05);
+
     RCLCPP_INFO_STREAM(this->get_logger(), "Publishing static transform between " << static_transform_stamped_.header.frame_id << 
                                             " to " << static_transform_stamped_.child_frame_id);
-
-    last_orientation_.setRPY(0.0, 0.0, 0.0) ;
-    orientation_increment_.setRPY(0.0, 0.0, 0.05);
 
     timer_ = this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&SimpleTfKinematics::timerCallBack, this));
 
@@ -44,6 +45,7 @@ SimpleTfKinematics::SimpleTfKinematics(const std::string &name) :
     restart_tf_service_server_ = this->create_service<bumperbot_interfaces::srv::RestartTransform>("restart_transform", 
                                std::bind(&SimpleTfKinematics::restartTransformCallback, this, std::placeholders::_1, std::placeholders::_2));
     
+
 };
 
 void SimpleTfKinematics::timerCallBack(){
@@ -84,7 +86,7 @@ void SimpleTfKinematics::timerCallBack(){
     }
     
 
-    RCLCPP_INFO_STREAM(this->get_logger(), "Number of rotations: " << rotations_counter_);
+    // RCLCPP_INFO_STREAM(this->get_logger(), "Number of rotations: " << rotations_counter_);
 
 }
 
