@@ -1,8 +1,8 @@
-#include "bumperbot_controller/simple_controller.hpp"
-#include <Eigen/Geometry>
+#include "bumperbot_controller/noisy_controller.hpp"
 #include <tf2/LinearMath/Quaternion.hpp>
+#include <random>
 
-SimpleController::SimpleController(const std::string &name) : 
+NoisyController::NoisyController(const std::string &name) : 
     Node(name), 
     left_wheel_previous_position_(0.0),
     right_wheel_previous_position_(0.0),
@@ -19,65 +19,44 @@ SimpleController::SimpleController(const std::string &name) :
     wheel_separation_ = this->get_parameter("wheel_separation").as_double();
 
     // Create a QoS profile with a history depth of 10
-    pub_wheel_cmd_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("/simple_velocity_controller/commands", 10);
-
-    sub_cmd_vel_ = this->create_subscription<geometry_msgs::msg::TwistStamped>("/bumperbot_controller/cmd_vel", 
-                                                                                10, 
-                                                                                std::bind(&SimpleController::velocityCallback, 
-                                                                                          this, 
-                                                                                          std::placeholders::_1
-                                                                                        )
-                                                                              );
-
     joint_state_sub_ = this->create_subscription<sensor_msgs::msg::JointState>("/joint_states", 
                                                                                 10, 
-                                                                                std::bind(&SimpleController::jointCallback, 
+                                                                                std::bind(&NoisyController::jointCallback, 
                                                                                             this, 
                                                                                             std::placeholders::_1
                                                                                         )
                                                                               );
 
-    odometry_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("/bumperbot_controller/odom", 10);
+    odometry_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("/bumperbot_controller/odom_noisy", 10);
 
-    odometry_msg_.header.frame_id = "odom";
-    odometry_msg_.child_frame_id = "base_footprint";
+    transform_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+    transform_stamped_.header.frame_id = "odom";
+    transform_stamped_.child_frame_id = "base_footprint_ekf";
+
     odometry_msg_.pose.pose.orientation.x = 0.0;
     odometry_msg_.pose.pose.orientation.y = 0.0;
     odometry_msg_.pose.pose.orientation.z = 0.0;
     odometry_msg_.pose.pose.orientation.w = 1.0;
 
-    transform_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
-    transform_stamped_.header.frame_id = "odom";
-    transform_stamped_.child_frame_id = "base_footprint";
-
     RCLCPP_INFO(this->get_logger(), "Using wheel radius: %f", wheel_radius_);
     RCLCPP_INFO(this->get_logger(), "Using wheel separation: %f", wheel_separation_);
 
-    // Initialize the speed conversion matrix
-    speed_conversion_matrix_ << wheel_radius_ / 2.0, wheel_radius_ / 2.0,
-                                 wheel_radius_ / wheel_separation_, -wheel_radius_ / wheel_separation_;
 
-    RCLCPP_INFO_STREAM(this->get_logger(), "The conversion matrix is \n" << speed_conversion_matrix_);
 }
 
-void SimpleController::velocityCallback(const geometry_msgs::msg::TwistStamped & msg)
+void NoisyController::jointCallback(const sensor_msgs::msg::JointState & msg)
 {
-    Eigen::Vector2d robot_speed(msg.twist.linear.x, msg.twist.angular.z);
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
-    Eigen::Vector2d wheel_speed = speed_conversion_matrix_.inverse() * robot_speed;
+    std::default_random_engine noise_generator(seed);
+    std::normal_distribution<double> left_encoder_noise(0.0, 0.005);
+    std::normal_distribution<double> right_encoder_noise(0.0, 0.005);
 
-    std_msgs::msg::Float64MultiArray wheel_speed_msg;
+    double wheel_encoder_left = msg.position.at(1) + left_encoder_noise(noise_generator);
+    double wheel_encoder_right = msg.position.at(0) + right_encoder_noise(noise_generator);
 
-    wheel_speed_msg.data.push_back(wheel_speed.coeff(1));
-    wheel_speed_msg.data.push_back(wheel_speed.coeff(0));
-
-    pub_wheel_cmd_->publish(wheel_speed_msg);
-}
-
-void SimpleController::jointCallback(const sensor_msgs::msg::JointState & msg)
-{
-    double delta_pos_left_wheel = msg.position.at(1) - left_wheel_previous_position_;
-    double delta_pos_right_wheel = msg.position.at(0) - right_wheel_previous_position_;
+    double delta_pos_left_wheel = wheel_encoder_left - left_wheel_previous_position_;
+    double delta_pos_right_wheel = wheel_encoder_right - right_wheel_previous_position_;
 
     rclcpp::Time msg_time = msg.header.stamp;
 
@@ -102,6 +81,7 @@ void SimpleController::jointCallback(const sensor_msgs::msg::JointState & msg)
 
     tf2::Quaternion q;
     q.setRPY(0, 0, theta_);
+    
     odometry_msg_.pose.pose.orientation.x = q.x();
     odometry_msg_.pose.pose.orientation.y = q.y();
     odometry_msg_.pose.pose.orientation.z = q.z();
@@ -133,7 +113,7 @@ void SimpleController::jointCallback(const sensor_msgs::msg::JointState & msg)
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<SimpleController>("simple_controller");
+    auto node = std::make_shared<NoisyController>("noisy_controller");
     rclcpp::spin(node);
     rclcpp::shutdown();
     return 0;

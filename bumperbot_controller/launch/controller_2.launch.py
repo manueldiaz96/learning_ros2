@@ -4,26 +4,40 @@ from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
 from launch.conditions import UnlessCondition, IfCondition
 
+
 def noisy_controller(context, *args, **kwargs):
-
     use_sim_time = LaunchConfiguration("use_sim_time")
-
+    use_python = LaunchConfiguration("use_python")
     wheel_radius = float(LaunchConfiguration("wheel_radius").perform(context))
     wheel_separation = float(LaunchConfiguration("wheel_separation").perform(context))
     wheel_radius_error = float(LaunchConfiguration("wheel_radius_error").perform(context))
     wheel_separation_error = float(LaunchConfiguration("wheel_separation_error").perform(context))
-    
-    noisy_controller = Node(
+
+    # noisy_controller_py = Node(
+    #     package="bumperbot_controller",
+    #     executable="noisy_controller.py",
+    #     parameters=[
+    #         {"wheel_radius": wheel_radius + wheel_radius_error,
+    #          "wheel_separation": wheel_separation + wheel_separation_error,
+    #          "use_sim_time": use_sim_time}],
+    #     condition=IfCondition(use_python),
+    # )
+
+    noisy_controller_cpp = Node(
         package="bumperbot_controller",
         executable="noisy_controller",
-        parameters=[{"wheel_radius": wheel_radius + wheel_radius_error,
-                     "wheel_separation": wheel_separation + wheel_separation_error,
-                     "use_sim_time": use_sim_time}]
+        parameters=[
+            {"wheel_radius": wheel_radius + wheel_radius_error,
+             "wheel_separation": wheel_separation + wheel_separation_error,
+             "use_sim_time": use_sim_time}],
+        condition=UnlessCondition(use_python),
     )
 
     return [
-        noisy_controller, 
+        # noisy_controller_py,
+        noisy_controller_cpp,
     ]
+
 
 
 def generate_launch_description():
@@ -48,7 +62,6 @@ def generate_launch_description():
         "wheel_separation",
         default_value="0.17",
     )
-
     wheel_radius_error_arg = DeclareLaunchArgument(
         "wheel_radius_error",
         default_value="0.005",
@@ -61,9 +74,8 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration("use_sim_time")
     use_simple_controller = LaunchConfiguration("use_simple_controller")
     use_python = LaunchConfiguration("use_python")
-    wheel_radius = LaunchConfiguration("wheel_radius")
-    wheel_separation = LaunchConfiguration("wheel_separation")
-    
+    # wheel_radius = LaunchConfiguration("wheel_radius")
+    # wheel_separation = LaunchConfiguration("wheel_separation")
 
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
@@ -85,14 +97,6 @@ def generate_launch_description():
         condition=UnlessCondition(use_simple_controller),
     )
 
-    twist_stamper = Node(
-        package="aux_utils",
-        executable="twist_stamped_publisher",
-        parameters=[{"in_topic_name": "bumperbot_controller/cmd_vel_unstamped"},
-                    {"out_topic_name": "bumperbot_controller/cmd_vel"}],
-        condition=UnlessCondition(use_simple_controller)
-    )
-
     simple_controller = GroupAction(
         condition=IfCondition(use_simple_controller),
         actions=[
@@ -100,8 +104,8 @@ def generate_launch_description():
                 package="controller_manager",
                 executable="spawner",
                 arguments=["simple_velocity_controller", 
-                           "--controller-manager", 
-                           "/controller_manager"
+                        "--controller-manager", 
+                        "/controller_manager"
                 ]
             ),
             # Node(
@@ -127,8 +131,6 @@ def generate_launch_description():
 
     noisy_controller_launch = OpaqueFunction(function=noisy_controller)
 
-    
-
     return LaunchDescription(
         [
             use_sim_time_arg,
@@ -142,9 +144,5 @@ def generate_launch_description():
             wheel_controller_spawner,
             simple_controller,
             noisy_controller_launch,
-            twist_stamper
-            
         ]
     )
-
-

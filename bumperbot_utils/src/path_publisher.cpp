@@ -37,7 +37,6 @@ void PathPublisher::odomCallback(const nav_msgs::msg::Odometry & msg)
     last_received_pose_.pose.orientation.z = msg.pose.pose.orientation.z; 
     last_received_pose_.pose.orientation.w = msg.pose.pose.orientation.w;
 
-
     path_msg.header.stamp = this->get_clock()->now();
     path_msg.header.frame_id = last_received_pose_.header.frame_id;
     path_msg.poses.push_back(last_received_pose_);
