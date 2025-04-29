@@ -15,6 +15,8 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(rclcpp_components REQUIRED)
 
 include_directories(include)
 
@@ -42,6 +44,30 @@ ament_target_dependencies(simple_tf_kinematics rclcpp bumperbot_msgs geometry_ms
 add_executable(simple_lifecycle_node src/simple_lifecycle_node.cpp)
 ament_target_dependencies(simple_lifecycle_node rclcpp rclcpp_lifecycle std_msgs)
 
+# START : Adding an action server
+
+add_library(simple_action_server SHARED src/simple_action_server.cpp)
+
+target_include_directories(simple_action_server PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+target_compile_definitions(simple_action_server
+  PRIVATE "SIMPLE_ACTION_SERVER_CPP_BUILDING_DLL")
+  ament_target_dependencies(simple_action_server
+  "bumperbot_msgs"
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components")
+
+rclcpp_components_register_node(simple_action_server 
+  PLUGIN "bumperbot_cpp_examples::SimpleActionServer" 
+  EXECUTABLE simple_action_server_node
+)
+
+# END : Adding an action server
+
+
 install(
   DIRECTORY include
   DESTINATION include
@@ -56,7 +82,15 @@ install(TARGETS
   simple_service_client
   simple_tf_kinematics
   simple_lifecycle_node
+  simple_action_server
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(TARGETS
+  simple_action_server
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib
 )
 
 ament_package()
