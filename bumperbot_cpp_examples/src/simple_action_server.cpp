@@ -50,7 +50,7 @@ private:
 
         auto result = std::make_shared<bumperbot_msgs::action::Fibonacci::Result>();
 
-        for(int i=0; (i < goal->order) && rclcpp::ok(); i++){
+        for(int i=1; (i < goal->order) && rclcpp::ok(); ++i){
             if (goal_handle -> is_canceling()){
                 result->sequence = sequence;
                 goal_handle->canceled(result);
@@ -58,7 +58,7 @@ private:
                 return;
             }
 
-            sequence.push_back(sequence[i]+sequence[i-1]);
+            sequence.push_back(sequence[i] + sequence[i-1]);
             goal_handle->publish_feedback(feedback);
             RCLCPP_INFO(get_logger(), "Publishing feedback");
             loop_rate.sleep();

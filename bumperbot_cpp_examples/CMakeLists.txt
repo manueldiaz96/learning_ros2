@@ -67,6 +67,29 @@ rclcpp_components_register_node(simple_action_server
 
 # END : Adding an action server
 
+# START : Adding an action client
+
+add_library(simple_action_client SHARED src/simple_action_client.cpp)
+
+target_include_directories(simple_action_client PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+target_compile_definitions(simple_action_client
+  PRIVATE "SIMPLE_ACTION_SERVER_CPP_BUILDING_DLL")
+  ament_target_dependencies(simple_action_client
+  "bumperbot_msgs"
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components")
+
+rclcpp_components_register_node(simple_action_client 
+  PLUGIN "bumperbot_cpp_examples::SimpleActionClient" 
+  EXECUTABLE simple_action_client_node
+)
+
+# END : Adding an action client
+
 
 install(
   DIRECTORY include
@@ -82,12 +105,12 @@ install(TARGETS
   simple_service_client
   simple_tf_kinematics
   simple_lifecycle_node
-  simple_action_server
   DESTINATION lib/${PROJECT_NAME}
 )
 
 install(TARGETS
   simple_action_server
+  simple_action_client
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib
