@@ -29,7 +29,7 @@ ament_target_dependencies(imu_republisher rclcpp sensor_msgs)
 ament_python_install_package(${PROJECT_NAME})
 
 install(
-  DIRECTORY include
+  DIRECTORY include rviz
   DESTINATION include
 )
 

@@ -44,6 +44,15 @@ ament_target_dependencies(simple_tf_kinematics rclcpp bumperbot_msgs geometry_ms
 add_executable(simple_lifecycle_node src/simple_lifecycle_node.cpp)
 ament_target_dependencies(simple_lifecycle_node rclcpp rclcpp_lifecycle std_msgs)
 
+add_executable(simple_lifecycle_node_2 src/simple_lifecycle_node_2.cpp)
+ament_target_dependencies(simple_lifecycle_node_2 rclcpp rclcpp_lifecycle std_msgs)
+
+add_executable(simple_qos_publisher src/simple_qos_publisher.cpp)
+ament_target_dependencies(simple_qos_publisher rclcpp std_msgs)
+
+add_executable(simple_qos_subscriber src/simple_qos_subscriber.cpp)
+ament_target_dependencies(simple_qos_subscriber rclcpp std_msgs)
+
 # START : Adding an action server
 
 add_library(simple_action_server SHARED src/simple_action_server.cpp)
@@ -105,6 +114,9 @@ install(TARGETS
   simple_service_client
   simple_tf_kinematics
   simple_lifecycle_node
+  simple_lifecycle_node_2
+  simple_qos_publisher
+  simple_qos_subscriber
   DESTINATION lib/${PROJECT_NAME}
 )
 
